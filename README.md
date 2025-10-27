@@ -1,25 +1,31 @@
-# ATIA - Automated Threat Intelligence Aggregator
+# ATIA (Automated Threat Intelligence Aggregator)
 
-ATIA is a comprehensive threat intelligence platform that aggregates and analyzes data from multiple sources including VirusTotal, OTX, and AbuseIPDB.
+ATIA is a comprehensive threat intelligence platform that aggregates and analyzes data from multiple sources including VirusTotal, OTX, and AbuseIPDB. It provides a centralized solution for threat detection, analysis, and reporting.
 
-## Project Structure
+## Features
 
-```
-atia/
-├── backend/          # Go backend service
-├── n8n/             # Workflow automation
-└── grafana/         # Dashboards and visualization
-```
+- Multi-source threat intelligence aggregation
+- Real-time threat scoring and analysis
+- RESTful API for integration
+- Automated workflows with n8n
+- Interactive dashboards with Grafana
+- MongoDB for efficient data storage
+
+## Technology Stack
+
+- **Backend**: Go 1.24+
+- **Database**: MongoDB
+- **Workflow Automation**: n8n
+- **Visualization**: Grafana
+- **Containerization**: Docker & Docker Compose
 
 ## Prerequisites
 
-- Go 1.19 or later
 - Docker and Docker Compose
-- MongoDB (run via Docker)
-- n8n (run via Docker)
-- Grafana (run via Docker)
+- Go 1.24 or later (for local development)
+- Git
 
-## Setup
+## Quick Start
 
 1. Clone the repository:
 ```bash
@@ -27,24 +33,31 @@ git clone https://github.com/AEX0TIC/ATIA.git
 cd ATIA
 ```
 
-2. Copy the environment file:
+2. Configure environment variables:
 ```bash
 cp backend/.env.example backend/.env
+# Edit .env file with your API keys and configurations
 ```
 
-3. Update the environment variables in `backend/.env` with your API keys.
-
-4. Start the services:
+3. Start the services:
 ```bash
 docker-compose up -d
 ```
 
-## Services
-
+4. Access the services:
 - Backend API: http://localhost:8080
 - n8n Dashboard: http://localhost:5678
 - Grafana Dashboard: http://localhost:3000
 - MongoDB: localhost:27017
+
+## API Endpoints
+
+- `GET /health` - Health check endpoint
+- `GET /api/v1/threats` - List all threats
+- `GET /api/v1/threats/:id` - Get threat details
+- `POST /api/v1/threats` - Submit new threat
+- `PUT /api/v1/threats/:id` - Update threat
+- `DELETE /api/v1/threats/:id` - Delete threat
 
 ## Development
 
@@ -59,6 +72,39 @@ go mod download
 go run cmd/server/main.go
 ```
 
+## Docker Commands
+
+- Start services: `docker-compose up -d`
+- Stop services: `docker-compose down`
+- View logs: `docker-compose logs`
+- Rebuild services: `docker-compose up -d --build`
+
+## Configuration
+
+### Backend Configuration
+- MongoDB connection settings
+- API keys for threat intelligence sources
+- Server port and host settings
+- Logging configuration
+
+### n8n Configuration
+- Authentication settings
+- Workflow automation settings
+- API integration settings
+
+### Grafana Configuration
+- Dashboard provisioning
+- Data source configuration
+- Alert settings
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-new-feature`
+3. Commit your changes: `git commit -am 'Add new feature'`
+4. Push to the branch: `git push origin feature/my-new-feature`
+5. Submit a pull request
+
 ## License
 
-MIT License
+This project is licensed under the MIT License - see the LICENSE file for details.
