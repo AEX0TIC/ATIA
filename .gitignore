@@ -1,0 +1,33 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/vendor/
+
+# Environment files
+.env
+*.env
+!.env.example
+
+# MongoDB
+data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# n8n
+n8n/.n8n
+n8n/node_modules/
+
+# Grafana
+grafana/data/
+
+# Docker
+docker-compose.override.yml
