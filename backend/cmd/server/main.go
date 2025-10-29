@@ -22,4 +22,10 @@ func main(){
 	if err != nil{
 		log.Fatalf("Failed to load config:%v", err)
 	}
-}
+
+	db, err := database.NewMongoDB(cfg.MongoURI, cfg.DatabaseName)
+	if err != nil{
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+	defer db.Disconnect()
+	
