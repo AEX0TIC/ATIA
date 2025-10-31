@@ -6,14 +6,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ThreatType string
+type ThreatIndicator struct {
 
-const (
-	ThreatTypeIP     ThreatType = "ip"
-	ThreatTypeDomain ThreatType = "domain"
-	ThreatTypeURL    ThreatType = "url"
-	ThreatTypeHash   ThreatType = "hash"
-)
+ ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+    Indicator   string             `bson:"indicator" json:"indicator"`
+    Type        string             `bson:"type" json:"type"` // "ip", "domain", "hash", "url"
+    RiskScore   float64            `bson:"risk_score" json:"risk_score"`
+    Reputation  string             `bson:"reputation" json:"reputation"` // "malicious", "suspicious", "clean"
+    Sources     []SourceData       `bson:"sources" json:"sources"`
+    Metadata    map[string]interface{} `bson:"metadata" json:"metadata"`
+    FirstSeen   time.Time          `bson:"first_seen" json:"first_seen"`
+    LastUpdated time.Time          `bson:"last_updated" json:"last_updated"`
+    Tags        []string           `bson:"tags" json:"tags"`
 
 type Threat struct {
 	ID          primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
