@@ -1,55 +1,38 @@
 package config
 
 import (
-	"errors"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	MongoURI      string
-	MongoDatabase string
-	APIKeys       APIKeys
-	Server        ServerConfig
+	Port          		string
+	MongoURI      		string
+	DatabaseName  		string
+	VirusTotalAPIKey	string 
+	OTXAPIKey 			string
+	AbuseIPDBAPIKey		string 
 }
 
-type APIKeys struct {
-	VirusTotal string
-	OTX        string
-	AbuseIPDB  string
-}
-
-type ServerConfig struct {
-	Port string
-	Host string
-}
-
-func Load() (*Config, error) {
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		return nil, errors.New("MONGODB_URI environment variable is required")
-	}
+func Loadconfig() (*Config, error) {
+	_ = godotenv.Load()
 
 	cfg := &Config{
-		MongoURI:      mongoURI,
-		MongoDatabase: getEnvOrDefault("MONGODB_DATABASE", "atia"),
-		APIKeys: APIKeys{
-			VirusTotal: os.Getenv("VIRUSTOTAL_API_KEY"),
-			OTX:        os.Getenv("OTX_API_KEY"),
-			AbuseIPDB:  os.Getenv("ABUSEIPDB_API_KEY"),
-		},
-		Server: ServerConfig{
-			Port: getEnvOrDefault("SERVER_PORT", "8080"),
-			Host: getEnvOrDefault("SERVER_HOST", "0.0.0.0"),
-		},
+		Port: 				getEnv("PORT", "8080"),
+		MongoURI: 			getEnv("MONGO_URI","mongodb://localhost:27017")
+		DatabaseName: 		getEnv("DATABASE_NAME", "atia")
+		VirusTotalAPIKey: 	getEnv("VIRUSTOTAL_API_KEY", " ")
+		OTXAPIKey: 			getEnv("OTX_API_KEY", " ")
+		AbuseIPDBAPIKey:   	getEnv("ABUSEIPDB", " ")
 	}
 
 	return cfg, nil
 }
 
-func getEnvOrDefault(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value!= "" {
+		return value 
 	}
-	return value
+	return defaultValue	
 }
