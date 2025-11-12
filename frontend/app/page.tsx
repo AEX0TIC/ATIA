@@ -51,7 +51,7 @@ async function analyzeThreat(indicator: string, type: string): Promise<ThreatInd
 
 async function getAllThreats(limit: number = 50): Promise<ThreatIndicator[]> {
   const response = await api.get('/api/v1/threats', { params: { limit } });
-  return response.data?.data || [];
+  return Array.isArray(response.data) ? response.data : response.data?.data || [];
 }
 
 // Components

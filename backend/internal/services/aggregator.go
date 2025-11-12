@@ -14,6 +14,7 @@ type Aggregator struct {
 	otxService   *OTXService
 	abuseService *AbuseIPDBService
 	db           *database.MongoDB
+	webhook      *WebhookService
 }
 
 func NewAggregator(vt *VirusTotalService, otx *OTXService, abuse *AbuseIPDBService, db *database.MongoDB) *Aggregator {
@@ -22,6 +23,17 @@ func NewAggregator(vt *VirusTotalService, otx *OTXService, abuse *AbuseIPDBServi
 		otxService:   otx,
 		abuseService: abuse,
 		db:           db,
+		webhook:      NewWebhookService(""),
+	}
+}
+
+func NewAggregatorWithWebhook(vt *VirusTotalService, otx *OTXService, abuse *AbuseIPDBService, db *database.MongoDB, webhookURL string) *Aggregator {
+	return &Aggregator{
+		vtService:    vt,
+		otxService:   otx,
+		abuseService: abuse,
+		db:           db,
+		webhook:      NewWebhookService(webhookURL),
 	}
 }
 
@@ -134,6 +146,14 @@ func (a *Aggregator) AnalyzeIndicator(indicator, indicatorType string) (*models.
 	if err := a.db.SaveThreat(threat); err != nil {
 		return threat, err
 	}
+
+	// Trigger webhook for n8n notification (non-blocking)
+	go func() {
+		if err := a.webhook.TriggerThreatAnalysis(threat); err != nil {
+			// Log error but don't fail the request
+			_ = err
+		}
+	}()
 
 	return threat, nil
 }
