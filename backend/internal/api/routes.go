@@ -1,27 +1,28 @@
 package api
 
 import (
+	"atia/internal/database"
+	"atia/internal/services"
+
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine) {
-	// Health check
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
-	})
+func SetupRoutes(router *gin.Engine, aggregator *services.Aggregator, db *database.MongoDB) {
+	handler := NewHandler(aggregator, db)
 
-	// API v1 routes
-	v1 := r.Group("/api/v1")
+	// Health check
+	router.GET("/health", handler.HealthCheck)
+
+	// API v1
+	v1 := router.Group("/api/v1")
 	{
-		threats := v1.Group("/threats")
-		{
-			threats.GET("", HandleListThreats)
-			threats.GET("/:id", HandleGetThreat)
-			threats.POST("", HandleCreateThreat)
-			threats.PUT("/:id", HandleUpdateThreat)
-			threats.DELETE("/:id", HandleDeleteThreat)
-		}
+		// Analysis endpoints
+		v1.POST("/analyze", handler.AnalyzeIndicator)
+
+		// Threat endpoints
+		v1.GET("/threats", handler.GetAllThreats)
+		v1.GET("/threats/:indicator", handler.GetThreat)
+		v1.GET("/threats/:indicator/history", handler.GetThreatHistory)
+		v1.DELETE("/threats/:id", handler.DeleteThreat)
 	}
 }
