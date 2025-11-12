@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 // Types
 interface ThreatIndicator {
@@ -124,7 +124,7 @@ function AnalyzerForm({ onResultsUpdate }: { onResultsUpdate: () => void }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -140,9 +140,26 @@ function AnalyzerForm({ onResultsUpdate }: { onResultsUpdate: () => void }) {
       setSuccess(`Analysis completed for ${indicator}`);
       setIndicator('');
       onResultsUpdate();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to analyze indicator';
+    } catch (err) {
+      let msg = 'Failed to analyze indicator';
+      
+      if (axios.isAxiosError(err)) {
+        const axiosErr = err as AxiosError<{error?: string}>;
+        if (!axiosErr.response) {
+          msg = `Network Error: Cannot connect to backend at ${apiBaseUrl}. Make sure the backend service is running.`;
+        } else if (axiosErr.response.data?.error) {
+          msg = `Backend Error: ${axiosErr.response.data.error}`;
+        } else if (axiosErr.response.statusText) {
+          msg = `HTTP ${axiosErr.response.status}: ${axiosErr.response.statusText}`;
+        } else {
+          msg = `Error: ${axiosErr.message}`;
+        }
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      
       setError(msg);
+      console.error('Analysis error:', err);
     } finally {
       setLoading(false);
     }
