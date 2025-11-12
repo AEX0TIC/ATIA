@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -14,18 +16,21 @@ type VirusTotalService struct {
 }
 
 func (v *VirusTotalService) AnalyzeURL(urlToCheck string) (map[string]interface{}, error) {
-	// VirusTotal requires URL encoding for the URL parameter
-	encodedURL := fmt.Sprintf("https://www.virustotal.com/api/v3/urls")
+	// VirusTotal URL analysis endpoint
+	endpoint := "https://www.virustotal.com/api/v3/urls"
 
-	// For URL analysis, we need to send a POST request with form data
-	req, err := http.NewRequest("POST", encodedURL, nil)
+	// Create form data with URL-encoded body
+	formData := url.Values{}
+	formData.Set("url", urlToCheck)
+	body := strings.NewReader(formData.Encode())
+
+	req, err := http.NewRequest("POST", endpoint, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Add("x-apikey", v.apiKey)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.PostForm.Add("url", urlToCheck)
 
 	resp, err := v.client.Do(req)
 	if err != nil {
@@ -33,13 +38,13 @@ func (v *VirusTotalService) AnalyzeURL(urlToCheck string) (map[string]interface{
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
+	if err := json.Unmarshal(responseBody, &result); err != nil {
 		return nil, err
 	}
 
