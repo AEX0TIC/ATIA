@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"atia/internal/database"
-	"atia/internal/models"
-	"atia/internal/services"
+	"github.com/AEX0TIC/ATIA/backend/internal/database"
+	"github.com/AEX0TIC/ATIA/backend/internal/models"
+	"github.com/AEX0TIC/ATIA/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )

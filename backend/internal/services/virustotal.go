@@ -13,6 +13,10 @@ type VirusTotalService struct {
 	client *http.Client
 }
 
+func (v *VirusTotalService) AnalyzeURL(indicator string) (map[string]interface{}, error) {
+	panic("unimplemented")
+}
+
 func NewVirusTotalService(apiKey string) *VirusTotalService {
 	return &VirusTotalService{
 		apiKey: apiKey,

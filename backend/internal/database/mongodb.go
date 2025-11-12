@@ -4,8 +4,7 @@ import (
 	"context"
 	"time"
 
-	"atia/internal/models"
-
+	"github.com/AEX0TIC/ATIA/backend/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,6 +49,21 @@ func NewMongoDB(uri, dbName string) (*MongoDB, error) {
 		database:   db,
 		collection: collection,
 	}, nil
+}
+
+// CreateIndexes ensures the required indexes exist for the collection.
+// It's safe to call multiple times.
+func (m *MongoDB) CreateIndexes() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "indicator", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := m.collection.Indexes().CreateOne(ctx, indexModel)
+	return err
 }
 
 func (m *MongoDB) SaveThreat(threat *models.ThreatIndicator) error {
@@ -136,4 +150,9 @@ func (m *MongoDB) Disconnect() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	return m.client.Disconnect(ctx)
+}
+
+// Close is an alias for Disconnect to provide a simpler API for callers.
+func (m *MongoDB) Close() error {
+	return m.Disconnect()
 }

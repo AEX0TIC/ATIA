@@ -1,8 +1,8 @@
 package api
 
 import (
-	"atia/internal/database"
-	"atia/internal/services"
+	"github.com/AEX0TIC/ATIA/backend/internal/database"
+	"github.com/AEX0TIC/ATIA/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )

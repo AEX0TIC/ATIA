@@ -1,8 +1,9 @@
 package scoring
 
 import (
-	"atia/internal/models"
 	"math"
+
+	"github.com/AEX0TIC/ATIA/backend/internal/models"
 )
 
 func CalculateRiskScore(sources []models.SourceData) float64 {

@@ -1,11 +1,12 @@
 package services
 
 import (
-	"backend/internal/database"
-	"backend/internal/models"
-	"backend/internal/scoring"
 	"sync"
 	"time"
+
+	"github.com/AEX0TIC/ATIA/backend/internal/database"
+	"github.com/AEX0TIC/ATIA/backend/internal/models"
+	"github.com/AEX0TIC/ATIA/backend/internal/scoring"
 )
 
 type Aggregator struct {
