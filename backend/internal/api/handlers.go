@@ -3,41 +3,101 @@ package api
 import (
 	"net/http"
 
+	"atia/internal/database"
+	"atia/internal/models"
+	"atia/internal/services"
+
 	"github.com/gin-gonic/gin"
 )
 
-func HandleGetThreat(c *gin.Context) {
+type Handler struct {
+	aggregator *services.Aggregator
+	db         *database.MongoDB
+}
+
+func NewHandler(aggregator *services.Aggregator, db *database.MongoDB) *Handler {
+	return &Handler{
+		aggregator: aggregator,
+		db:         db,
+	}
+}
+
+func (h *Handler) AnalyzeIndicator(c *gin.Context) {
+	var req models.AnalysisRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.AnalysisResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	threat, err := h.aggregator.AnalyzeIndicator(req.Indicator, req.Type)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.AnalysisResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.AnalysisResponse{
+		Success: true,
+		Data:    threat,
+	})
+}
+
+func (h *Handler) GetThreat(c *gin.Context) {
+	indicator := c.Param("indicator")
+
+	threat, err := h.db.GetThreat(indicator)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Threat not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, threat)
+}
+
+func (h *Handler) GetAllThreats(c *gin.Context) {
+	threats, err := h.db.GetAllThreats(100)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, threats)
+}
+
+func (h *Handler) GetThreatHistory(c *gin.Context) {
+	indicator := c.Param("indicator")
+
+	history, err := h.db.GetThreatHistory(indicator)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.HistoricalData{
+		Indicator: indicator,
+		History:   history,
+	})
+}
+
+func (h *Handler) DeleteThreat(c *gin.Context) {
 	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{
-		"message": "GetThreat endpoint",
-		"id":      id,
-	})
+
+	if err := h.db.DeleteThreat(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Threat deleted successfully"})
 }
 
-func HandleListThreats(c *gin.Context) {
+func (h *Handler) HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "ListThreats endpoint",
-	})
-}
-
-func HandleCreateThreat(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "CreateThreat endpoint",
-	})
-}
-
-func HandleUpdateThreat(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{
-		"message": "UpdateThreat endpoint",
-		"id":      id,
-	})
-}
-
-func HandleDeleteThreat(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{
-		"message": "DeleteThreat endpoint",
-		"id":      id,
+		"status":  "healthy",
+		"service": "ATIA Backend",
 	})
 }
